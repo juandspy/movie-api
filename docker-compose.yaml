@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      MOVIE_API__HOST: db
+    restart: always
+  db:
+    image: "postgres:15.0-alpine"
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+    volumes:
+      -  ./db-init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
