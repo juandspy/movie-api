@@ -135,7 +135,7 @@ And run some queries:
 ❯ curl -w "%{http_code}" -X GET $MOVIE_API_URL/movies \
    -H 'Content-Type: application/json' \
    -d '{"id":"6a940bee-4adb-4061-a8d1-f1f9495c19d6"}'
-{"id":1,"name":"test","image":"","description":""}
+{"id":"6a940bee-4adb-4061-a8d1-f1f9495c19d6","name":"test","image":"","description":""}
 200% 
 ```
 
