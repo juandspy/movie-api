@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-api-deployment
+  labels:
+    app: movie-api
+spec:
+  selector:
+    matchLabels:
+      app: movie-api
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: movie-api
+    spec:
+      containers:
+        - name: movie-api
+          image: juandspy/movie-api:latest
+          imagePullPolicy: Never  # Use this for local images
+          ports:
+            - containerPort: 8000
+          env:
+          - name: MOVIE_API__HOST
+            value: postgres
+          resources:
+            limits:
+              memory: "32Mi"
+              cpu: "50m"
+---
+apiVersion: v1  
+kind: Service
+metadata:
+  name: movie-api
+  labels:
+    app: movie-api
+spec:
+  type: NodePort
+  selector:
+    app: movie-api
+  ports: 
+  - name: http
+    port: 8000
+    targetPort: 8000
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv-volume
+  labels:
+    type: local
+    app: postgres
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data"
+  persistentVolumeReclaimPolicy: Recycle
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pv-claim
+  labels:
+    app: postgres
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-initdb-config
+data:
+  init.sql: |
+    CREATE TABLE movies (
+        id UUID PRIMARY KEY,
+        name VARCHAR (50) NOT NULL,
+        description VARCHAR (500),
+        image VARCHAR (500)
+    );
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  containers:
+  - name: postgres
+    image: postgres:15.0-alpine
+    env:
+    - name: POSTGRES_PASSWORD
+      value: "mysecretpassword"
+    volumeMounts:
+    - mountPath: /var/lib/postgresql/data
+      name: postgres-persistent-storage
+    - mountPath: /docker-entrypoint-initdb.d
+      name: postgresql-initdb
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "50m"
+  volumes:
+  - name: postgres-persistent-storage
+    persistentVolumeClaim:
+      claimName: postgres-pv-claim
+  - name: postgresql-initdb
+    configMap:
+      name: postgresql-initdb-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+  selector:
+    app: postgres
