@@ -4,7 +4,9 @@ This is a very simple implementation of a movie API. The idea is to have two bas
 
 ## How to use
 
-`store` a movie:
+### Store a movie
+
+In order to store a movie:
 ```
 ❯ curl -w "%{http_code}" -X POST http://127.0.0.1:8000/movies \
    -H 'Content-Type: application/json' \
@@ -22,7 +24,9 @@ The `name` field is mandatory:
 400% 
 ```
 
-`get` a movie:
+### Get a movie
+
+In order to get a movie:
 ```
 ❯ curl -X POST http://127.0.0.1:8000/movies \
    -H 'Content-Type: application/json' \
@@ -49,7 +53,7 @@ sql: no rows in result set
 
 ## How to run
 
-You can configure the database connection settings using environment variables. These are the default values:
+This tool is shipped as a single binary so it can be run anywhere needed. As each environment may have different configuration for the database, you can configure the database connection settings using environment variables. These are the default values:
 
 ```
 MOVIE_API__HOST: localhost
@@ -59,6 +63,8 @@ MOVIE_API__PASSWORD: mysecretpassword
 MOVIE_API__DBNAME: postgres
 MOVIE_API__DRIVER: postgres
 ```
+
+Some options to run this tool:
 
 ### Run locally
 
@@ -138,10 +144,10 @@ And run some queries:
 ### Backend
 
 - Adding more extra fields would mean making some migrations, which shouldn't be dangerous for consumers as it's just adding more info, not editing or removing the already existing one.
-- There are just 2 methods accepted: GET and POST. It would be straightforward to add a PATCH method to update a movie contents based on its ID.
-- If the number and size of the movie fields grows enough, it would be nice to use GraphQL to retain just the necessary fields.
+- There are just 2 methods accepted: GET and POST. It would be straightforward to add a PATCH method to update a movie contents based on its ID. Same with a DELETE one.
+- If the number and size of the movie fields grow enough, it would be nice to use GraphQL to retain just the necessary fields.
 - A new UUID is generated once every movie is stored. This UUID is required to get the movie in future requests. I'm using a UUID instead of an incremental ID to avoid any errors due to concurrency. This way, we can replicate the API as much as we want without any risks. Don't believe it? Try with [load.sh](load.sh).
-- The expected image field would be a link to an image. It would be also possible to accept a raw image, store it in an S3 bucket, get the object url and store it in the database, but it's better to limit the scope of the API to receive a url. The best strategy is to keep the microservice as simple as possible and if this would be necessary, add a new one.
+- The image field would be a link to an image. It would be also possible to accept a raw image, store it in an S3 bucket, get the object url and store it in the database, but it's better to limit the scope of the API to receive a url. The best strategy is to keep the microservice as simple as possible and if this would be necessary, add a new microservice apart.
 
 ### Database
 
