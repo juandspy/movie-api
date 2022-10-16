@@ -2,6 +2,15 @@
 
 This is a very simple implementation of a movie API. The idea is to have two basic endpoints to get and store a movie with some basic fields. For the moment, just the name of the film is needed.
 
+The database schema is as follows:
+
+| field       | type         |
+| ----------- | ------------ |
+| **id**      | **UUID**     |
+| name        | VARCHAR(50)  |
+| description | VARCHAR(500) |
+| image       | VARCHAR(500) |
+
 ## How to use
 
 ### Store a movie
